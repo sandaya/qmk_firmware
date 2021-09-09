@@ -118,11 +118,16 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {    
         case SYM_ENT:
-            // Very low tapping term to make sure I don't hit Enter accidentally.
+            // Lower tapping term so Enter doesn't get hit accidentally
             return TAPPING_TERM - 50;    
         case HOME_A:
         case HOME_SCLN:
-            return TAPPING_TERM + 50;  // increase for gui
+        case HOME_S:
+        case HOME_L:
+        case HOME_X:
+        case HOME_DOT:
+            // increase for modtaps for gui, alt
+            return TAPPING_TERM + 50;  
         default:
             return TAPPING_TERM;
     }
