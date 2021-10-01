@@ -4,13 +4,20 @@
 bool process_record_user_oled(uint16_t keycode, keyrecord_t *record);
 #endif 
 
+#define JIGGLE_DELAY 5000
+enum custom_keycodes {
+    JIGGLE = SAFE_RANGE,
+};
+bool jiggle_mode = false;
+uint32_t jiggle_timer = 0;
+
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [BASE] = LAYOUT( \
   KC_GRV,  KC_1,   KC_2,   KC_3,   KC_4,      KC_5,                            KC_6,     KC_7,    KC_8,    KC_9,     KC_0,      KC_MINS, \
   KC_BSLS, KC_Q,   KC_W,   KC_E,   KC_R,      KC_T,                            KC_Y,     KC_U,    KC_I,    KC_O,     KC_P,      KC_EQL,  \
   KC_LCTL, HOME_A, HOME_S, HOME_D, HOME_F,    KC_G,                            KC_H,     HOME_J,  HOME_K,  HOME_L,   HOME_SCLN, KC_QUOT, \
-  KC_LBRC, KC_Z,   HOME_X, KC_C,   KC_V,      KC_B,    U_NP,          U_NU,    KC_N,     KC_M,    KC_COMM, HOME_DOT, KC_SLSH,   KC_RBRC, \
+  KC_LBRC, KC_Z,   HOME_X, KC_C,   KC_V,      KC_B,    U_NP,          JIGGLE,  KC_N,     KC_M,    KC_COMM, HOME_DOT, KC_SLSH,   KC_RBRC, \
                            U_NU,   MEDIA_ESC, NAV_SPC, MOUSE_TAB,     SYM_ENT, NUM_BSPC, FUN_DEL, U_NU \
 ),
 [NUM] = LAYOUT( \
@@ -84,6 +91,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
+   switch (keycode) {
+    case JIGGLE:
+        if (record->event.pressed) {
+          jiggle_mode = !jiggle_mode;  
+          jiggle_timer = timer_read32(); 
+        }
+        break;
+    }
+
   #ifdef OLED_ENABLE
   process_record_user_oled(keycode, record);
   #endif  
@@ -91,6 +107,32 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
+
+void matrix_scan_user(void){
+  if (jiggle_mode) {  
+    uint32_t elapsed = timer_elapsed32(jiggle_timer);
+    if (elapsed > JIGGLE_DELAY) {   
+      #if defined(__AVR_ATmega32U4__)
+          uint8_t digit = (TCNT0 + TCNT1 + TCNT3 + TCNT4) % 10;
+      #else
+          uint8_t digit = rand() % 10;
+      #endif    
+      if (digit < 2) {
+        tap_code(KC_MS_WH_DOWN);
+      } else if (digit < 4) {
+        tap_code(KC_MS_WH_UP);        
+      } else if (digit < 7) {
+        tap_code(KC_MS_UP);
+        tap_code(KC_MS_RIGHT);
+      } else {
+        tap_code(KC_MS_DOWN);
+        tap_code(KC_MS_LEFT);
+      }
+      
+      jiggle_timer = timer_read32(); 
+    }
+  }
+}
 
 bool get_tapping_force_hold(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
