@@ -119,12 +119,24 @@ void matrix_scan_user(void){
       #endif    
       if (digit < 2) {
         tap_code(KC_MS_WH_DOWN);
+        tap_code(KC_MS_WH_DOWN);
+        tap_code(KC_MS_WH_DOWN);
       } else if (digit < 4) {
-        tap_code(KC_MS_WH_UP);        
+        tap_code(KC_MS_WH_UP);      
+        tap_code(KC_MS_WH_UP);
+        tap_code(KC_MS_WH_UP);  
       } else if (digit < 7) {
         tap_code(KC_MS_UP);
         tap_code(KC_MS_RIGHT);
+        tap_code(KC_MS_UP);
+        tap_code(KC_MS_LEFT);
+        tap_code(KC_MS_UP);
+        tap_code(KC_MS_RIGHT);
       } else {
+        tap_code(KC_MS_DOWN);
+        tap_code(KC_MS_LEFT);
+        tap_code(KC_MS_DOWN);
+        tap_code(KC_MS_RIGHT);
         tap_code(KC_MS_DOWN);
         tap_code(KC_MS_LEFT);
       }
